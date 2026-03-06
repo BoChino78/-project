@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>小骐给小张的专属饮食表~ 💖</title>
+    <link href="https://fonts.googleapis.com/css2?family=Zcool+KuaiLe&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #ff9a9e; --secondary: #fecfef; --bg-light: #fffcf5; 
+            --text-main: #5d4037; --green-light: #e1f3d8; --green-dark: #67c23a;
+            --red-light: #fde2e2; --red-dark: #f56c6c; --yellow-light: #faecd8;
+            --yellow-dark: #e6a23c; --shadow-soft: 0 10px 25px rgba(255, 154, 158, 0.15);
+            --shadow-hover: 0 15px 35px rgba(255, 154, 158, 0.3);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: 'Nunito', 'Microsoft YaHei', sans-serif; color: var(--text-main);
+            background: linear-gradient(120deg, #fffcf5, #ffe0e0, #fff0f5);
+            background-size: 400% 400%; animation: gradientBG 15s ease infinite;
+            overflow-x: hidden; min-height: 100vh; padding-bottom: env(safe-area-inset-bottom);
+        }
+        @keyframes gradientBG { 0% {background-position: 0% 50%;} 50% {background-position: 100% 50%;} 100% {background-position: 0% 50%;} }
+        
+        /* 粒子与特效 */
+        .heart-bg { position: fixed; color: rgba(255,154,158,0.4); font-size: 20px; animation: floatUp 10s linear infinite; z-index: -1; pointer-events: none; }
+        @keyframes floatUp { 0% {transform: translateY(100vh) scale(0.5) rotate(0deg); opacity: 1;} 100% {transform: translateY(-10vh) scale(1.5) rotate(360deg); opacity: 0;} }
+        .trail-particle { position: fixed; pointer-events: none; z-index: 9999; animation: fadeOutDown 1s forwards; }
+        @keyframes fadeOutDown { 0% {opacity: 1; transform: scale(1.2);} 100% {opacity: 0; transform: scale(0) translateY(40px);} }
+
+        /* 全局 Toast */
+        .toast {
+            position: fixed; top: 30px; left: 50%; transform: translateX(-50%) translateY(-150px);
+            background: rgba(255, 154, 158, 0.95); color: white; padding: 12px 25px;
+            border-radius: 30px; font-weight: bold; z-index: 10000; transition: 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); }
+
+        /* ================= 小狗超级互动样式 ================= */
+        .cute-dog { 
+            position: fixed; bottom: max(15px, env(safe-area-inset-bottom)); right: 20px; 
+            width: 100px; height: 100px; z-index: 999; cursor: pointer;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @media (min-width: 768px) { .cute-dog { width: 120px; height: 120px; } }
+        
+        .dog-speech { 
+            position: absolute; top: -65px; right: 20px; background: white; color: var(--primary); 
+            padding: 10px 18px; border-radius: 20px 20px 5px 20px; font-weight: bold; font-size: 13px; 
+            box-shadow: 0 5px 15px rgba(255,154,158,0.4); opacity: 0; transform: scale(0.5); 
+            transition: 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); pointer-events: none; 
+            white-space: nowrap; border: 2.2px solid var(--primary);
+        }
+        .dog-speech.show { opacity: 1; transform: scale(1); }
+
+        .dog-excited { animation: dogBounce 0.4s infinite !important; }
+        @keyframes dogBounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+        .dog-dizzy { animation: dogSpin 0.5s infinite linear !important; }
+        @keyframes dogSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        .dog-head { position: relative; width: 100%; height: 100%; background-color: #f7d794; border-radius: 50% 50% 42% 42%; box-shadow: 0 8px 15px rgba(0,0,0,0.1); }
+        .dog-ear { position: absolute; width: 35%; height: 50%; background-color: #e1b12c; border-radius: 50% 50% 20% 20%; top: -10%; z-index: -1; transform-origin: top center; transition: transform 0.3s; }
+        .dog-ear.left { left: -5%; transform: rotate(-25deg); }
+        .dog-ear.right { right: -5%; transform: rotate(25deg); }
+        .ear-wiggle .left { animation: flapLeft 0.3s infinite; }
+        .ear-wiggle .right { animation: flapRight 0.3s infinite; }
+        @keyframes flapLeft { 0%, 100% {transform: rotate(-25deg);} 50% {transform: rotate(-45deg);} }
+        @keyframes flapRight { 0%, 100% {transform: rotate(25deg);} 50% {transform: rotate(45deg);} }
+
+        .dog-eye { position: absolute; top: 25px; width: 16px; height: 20px; background: #fff; border-radius: 50%; border: 2.5px solid #5d4037; overflow: hidden; }
+        .dog-eye.left { left: 20%; } .dog-eye.right { right: 20%; }
+        .eyes-closed .dog-eye { height: 4px; top: 35px; background: #5d4037; }
+        .eyes-closed .dog-pupil { opacity: 0; }
+        .dog-pupil { position: absolute; width: 8px; height: 8px; background: #5d4037; border-radius: 50%; top: 4px; left: 3px; transition: 0.1s; }
+        
+        .dog-face { position: absolute; top: 35%; left: 12%; right: 12%; height: 45%; background: #fff; border-radius: 40% 40% 50% 50%; }
+        .dog-nose { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); width: 18px; height: 12px; background: #5d4037; border-radius: 50%; }
+        .dog-blush { position: absolute; top: 32px; width: 15px; height: 8px; background: rgba(255,154,158,0.5); border-radius: 50%; filter: blur(2px); transition: 0.3s; }
+        .dog-blush.left { left: 5px; } .dog-blush.right { right: 5px; }
+        .is-shy .dog-blush { transform: scale(1.6); background: rgba(255, 80, 80, 0.7); }
+
+        /* 特殊彩蛋弹窗 */
+        .combo-modal {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0);
+            width: 85%; max-width: 350px; background: white; border-radius: 30px; padding: 30px 20px;
+            z-index: 10002; box-shadow: 0 20px 50px rgba(255, 154, 158, 0.5); text-align: center;
+            transition: 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        .combo-modal.active { transform: translate(-50%, -50%) scale(1); }
+        .combo-modal h2 { color: var(--primary); font-family: 'Zcool KuaiLe'; margin-bottom: 15px; }
+        .combo-modal p { line-height: 1.6; color: #666; font-size: 0.95rem; margin-bottom: 20px; }
+        .combo-modal button { background: var(--primary); color: white; border: none; padding: 10px 30px; border-radius: 20px; font-weight: bold; cursor: pointer;}
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 10001; display: none; backdrop-filter: blur(3px); }
+
+        /* 页面布局 */
+        .page-container { max-width: 1000px; margin: 0 auto; padding: 20px; padding-bottom: 120px; }
+        .page { display: none; animation: popIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards; }
+        .page.active { display: block; }
+        @keyframes popIn { 0% {opacity: 0; transform: scale(0.9) translateY(20px);} 100% {opacity: 1; transform: scale(1) translateY(0);} }
+
+        /* 标题和按钮 */
+        .title-box { text-align: center; background: rgba(255,255,255,0.9); padding: 25px; border-radius: 30px; box-shadow: var(--shadow-soft); border: 3px dashed var(--primary); margin-bottom: 30px; position: relative; }
+        .title-box h1 { font-family: 'Zcool KuaiLe', cursive; color: var(--primary); font-size: 1.8rem; margin-bottom: 8px; }
+        .title-box p { color: #888; font-size: 1rem; }
+        .back-btn { position: absolute; left: 15px; top: 15px; background: var(--primary); color: white; padding: 8px 15px; border-radius: 20px; text-decoration: none; font-weight: bold; font-size: 0.9rem; border: none; cursor: pointer; transition: transform 0.2s, background 0.3s; }
+        .back-btn:hover { background: #ff758c; transform: scale(1.05); }
+        .back-btn:active { transform: scale(0.95); }
+
+        /* 摇号机 */
+        .meal-planner { background: white; border-radius: 25px; padding: 20px; margin-bottom: 30px; box-shadow: var(--shadow-soft); text-align: center; position: relative;}
+        .meal-btn { background: linear-gradient(45deg, var(--primary), #ff758c); color: white; border: none; padding: 12px 30px; border-radius: 50px; font-size: 1.1rem; cursor: pointer; font-weight: bold; font-family: 'Zcool KuaiLe', cursive; box-shadow: 0 6px 15px rgba(255, 154, 158, 0.4); transition: transform 0.2s, box-shadow 0.3s;}
+        .meal-btn:hover { transform: scale(1.05); box-shadow: 0 8px 20px rgba(255, 154, 158, 0.5); }
+        .meal-btn:active { transform: scale(0.95); }
+        .meal-result { margin-top: 20px; display: none; background: #fff5f5; padding: 15px; border-radius: 20px; text-align: left; border: 2px dashed #ffe0e0; animation: popIn 0.4s; }
+        .meal-row { margin-bottom: 10px; padding: 10px; background: white; border-radius: 12px; font-size: 0.95rem;}
+        .meal-tag { background: var(--primary); color: white; padding: 3px 10px; border-radius: 8px; font-weight: bold; margin-right: 12px; font-size: 0.8rem; }
+
+        /* 网格导航与悬浮特效 */
+        .nav-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; }
+        .nav-card { background: white; border-radius: 20px; padding: 20px 10px; text-align: center; cursor: pointer; box-shadow: var(--shadow-soft); position: relative; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .nav-card:hover { transform: translateY(-8px) scale(1.03); box-shadow: var(--shadow-hover); }
+        .nav-card:active { transform: scale(0.95); }
+        .nav-card i { font-size: 2.5rem; color: var(--primary); margin-bottom: 10px; transition: transform 0.3s; }
+        .nav-card:hover i { transform: rotate(10deg) scale(1.1); }
+        .nav-card h3 { font-size: 1.1rem; margin-bottom: 5px; color: var(--text-main); }
+        .nav-badge { position: absolute; top: -8px; right: -8px; background: var(--red-dark); color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; transform: rotate(15deg); }
+
+        /* 食物卡片与图片动态 */
+        .food-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+        .food-card { background: white; border-radius: 20px; overflow: hidden; box-shadow: var(--shadow-soft); display: flex; flex-direction: column; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .food-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-hover); }
+        
+        .img-wrapper { position: relative; width: 100%; height: 180px; overflow: hidden; border-bottom: 3px solid #ffe0e0; }
+        .img-wrapper img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s cubic-bezier(0.165, 0.84, 0.44, 1); }
+        .food-card:hover .img-wrapper img { transform: scale(1.15); } /* 图片缩放特效 */
+        
+        .love-btn { position: absolute; top: 10px; right: 10px; font-size: 20px; background: rgba(255,255,255,0.85); width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; border-radius: 50%; box-shadow: 0 2px 8px rgba(0,0,0,0.1); cursor: pointer; z-index: 10; transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .love-btn:hover { transform: scale(1.15); background: #fff; }
+        .love-btn.liked { color: #f56c6c; transform: scale(1.1); }
+
+        .food-info { padding: 15px; flex-grow: 1; display: flex; flex-direction: column; }
+        .food-info h3 { font-size: 1.15rem; color: var(--text-main); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;}
+        .food-info .tag { font-size: 0.75rem; padding: 3px 8px; border-radius: 10px; background: var(--green-light); color: var(--green-dark); }
+        .food-info .calorie { color: var(--red-dark); font-weight: bold; font-size: 0.9rem; margin-bottom: 8px; }
+        .food-info .desc { font-size: 0.9rem; color: #666; line-height: 1.5; background: #fafafa; padding: 10px; border-radius: 12px; margin-top: auto; border: 1px solid transparent; transition: border 0.3s; }
+        .food-card:hover .desc { border-color: #fecfef; }
+
+        .boyfriend-note {
+            margin-top: 10px; background: #fff0f3; border: 1px dashed var(--primary);
+            padding: 10px; border-radius: 10px; color: var(--primary); font-size: 0.85rem;
+            display: flex; align-items: flex-start; gap: 8px; animation: pulseNote 2s infinite; cursor: pointer; transition: background 0.3s, color 0.3s;
+        }
+        .boyfriend-note:hover { background: var(--primary); color: #fff; animation: none; }
+        @keyframes pulseNote { 0% { box-shadow: 0 0 0 0 rgba(255, 154, 158, 0.4); } 70% { box-shadow: 0 0 0 8px rgba(255, 154, 158, 0); } }
+        
+        /* 损伤卡片 */
+        .injury-card .problem { background: #fff5f5; padding: 10px; border-radius: 8px; border-left: 4px solid var(--red-dark); margin-bottom: 10px; font-size: 14px; }
+        .injury-card .solution { background: #f0fff4; padding: 10px; border-radius: 8px; font-size: 14px; margin-bottom: 10px; color: #2d3748;}
+        .injury-card .solution b { color: #38a169; }
+    </style>
+</head>
+<body>
+
+    <div id="heart-container"></div>
+    <div id="toast" class="toast"></div>
+    <div class="modal-overlay" id="modalOverlay"></div>
+    <div class="combo-modal" id="comboModal">
+        <h2>🎁 终极彩蛋！</h2>
+        <p id="modalContent">宝宝点这么多下，一定是超级超级想我啦！虽然摸不到小骐，但小骐会一直陪着你。你是全世界最好的女孩子！不管你怎么样我都永远爱着你~么么哒~ ❤️</p>
+        <button onclick="closeModal()">接收投喂 (啵唧~)</button>
+    </div>
+
+    <!-- 互动小狗 -->
+    <div class="cute-dog" onclick="dogClick(event)">
+        <div class="dog-speech" id="dogBubble">想你了宝宝~ 💖</div>
+        <div class="dog-head">
+            <div class="dog-ear left"></div>
+            <div class="dog-ear right"></div>
+            <div class="dog-eye left"><div class="dog-pupil"></div></div>
+            <div class="dog-eye right"><div class="dog-pupil"></div></div>
+            <div class="dog-face">
+                <div class="dog-nose"></div>
+                <div class="dog-blush left"></div>
+                <div class="dog-blush right"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="page-container">
+        
+        <!-- ================= 首页 ================= -->
+        <div id="page-home" class="page active">
+            <div class="title-box">
+                <h1 id="dynamic-greeting">🍱 小骐来帮宝宝啦~</h1>
+                <p>科学吃 · 轻松瘦 💪 小骐不在身边也要乖乖听话哦 💕</p>
+            </div>
+
+            <div class="meal-planner">
+                <button class="meal-btn" onclick="generateMeal(event)">🎲 生成今日食谱</button>
+                <div class="meal-result" id="mealResult">
+                    <div class="meal-row"><span class="meal-tag">早餐</span><span id="meal-break"></span></div>
+                    <div class="meal-row"><span class="meal-tag">午餐</span><span id="meal-lunch"></span></div>
+                    <div class="meal-row"><span class="meal-tag">晚餐</span><span id="meal-dinner"></span></div>
+                    <div class="meal-row"><span class="meal-tag">加餐</span><span id="meal-snack"></span></div>
+                </div>
+            </div>
+
+            <div class="nav-grid">
+                <div class="nav-card" onclick="goTo('page-a')"><div class="nav-badge" style="background:var(--green-dark)">推荐吃</div><i class="fas fa-seedling"></i><h3>A级主食</h3><p>随便吃不长肉</p></div>
+                <div class="nav-card" onclick="goTo('page-b')"><div class="nav-badge" style="background:var(--yellow-dark)">偶尔吃</div><i class="fas fa-bread-slice"></i><h3>B级主食</h3><p>一周2-3次</p></div>
+                <div class="nav-card" onclick="goTo('page-c')"><div class="nav-badge" style="background:var(--red-dark)">最好不吃</div><i class="fas fa-times-circle"></i><h3>C级主食</h3><p>容易胖哦</p></div>
+                <div class="nav-card" onclick="goTo('page-low')"><div class="nav-badge" style="background:var(--green-dark)">吃不胖</div><i class="fas fa-carrot"></i><h3>低碳水</h3><p>营养健康菜</p></div>
+                <div class="nav-card" onclick="goTo('page-mid')"><div class="nav-badge" style="background:var(--yellow-dark)">日常吃</div><i class="fas fa-apple-alt"></i><h3>中碳水</h3><p>能量满满</p></div>
+                <div class="nav-card" onclick="goTo('page-high')"><div class="nav-badge" style="background:var(--red-dark)">少吃哦</div><i class="fas fa-cookie"></i><h3>高碳水</h3><p>偶尔解馋</p></div>
+                <div class="nav-card" onclick="goTo('page-fruit')"><div class="nav-badge" style="background:var(--primary)">维C满</div><i class="fas fa-lemon"></i><h3>水果区</h3><p>酸甜适量</p></div>
+                <div class="nav-card" onclick="goTo('page-injury')"><div class="nav-badge" style="background:#4299e1">健康</div><i class="fas fa-first-aid"></i><h3>运动损伤指南</h3><p>别怕有我在</p></div>
+            </div>
+        </div>
+
+        <!-- ================= A级主食 ================= -->
+        <div id="page-a" class="page">
+            <div class="title-box">
+                <button class="back-btn" onclick="goTo('page-home')">← 返回</button>
+                <h1 style="color:var(--green-dark);">🌽 A级 · 减脂主食</h1>
+                <p>饱腹感强，升糖慢，乖乖可以随便吃~</p>
+            </div>
+            <div class="food-grid">
+                <div class="food-card">
+                    <div class="img-wrapper"><img src="https://p0.ssl.qhimgs1.com/t044bcb14295fa8fb2e.jpg"></div>
+                    <div class="food-info"><h3>蒸玉米 <span class="tag">甜糯</span></h3>
+                        <div class="desc">建议买那种一根根真空包装的甜糯玉米，大概200g一根，正好一顿主食的量。搭配一杯无糖的牛奶或者豆浆都不错呀。<div class="boyfriend-note"><i class="fas fa-heart"></i> <span><b>小骐便签：</b>煮玉米挺好吃的~哪天我给你买点试试</span></div></div></div></div>
+                <div class="food-card">
+                    <div class="img-wrapper"><img src="https://pic.rmb.bdstatic.com/bjh/cms/250224/48314bd0a42f586590b1e8bdcb9176e1_1740378963.878_254.jpeg"></div>
+                    <div class="food-info"><h3>红薯 / 紫薯 <span class="tag">通便神器</span></h3>
+                        <div class="desc">红心蜜薯虽然好吃但糖分高一点点，偶尔可以换成紫薯。带皮吃更健康但~比较难以接受啦。<div class="boyfriend-note"><i class="fas fa-kiss-wink-heart"></i> <span><b>小骐便签：</b>多吃点通畅肠胃，可以挑战拉满咯</span></div></div></div></div>
+                <div class="food-card">
+                    <div class="img-wrapper"><img src="https://img1.baidu.com/it/u=2451498192,1056912932&fm=253&app=138&f=JPEG?w=800&h=1422"></div>
+                    <div class="food-info"><h3>铁棍山药 <span class="tag">养胃</span></h3>
+                        <div class="desc">虽然没什么味道，但是很养胃！可以蒸熟了蘸一点点白糖（只能一点点哦），或者蓝莓酱。<div class="boyfriend-note"><i class="fas fa-thumbs-up"></i> <span><b>小骐便签：</b>会有点痒，最好戴一次性手套</span></div></div></div></div>
+                <div class="food-card">
+                    <div class="img-wrapper"><img src="https://b0.bdstatic.com/21690cada474cd8dedb33bbaa9447447.jpg"></div>
+                    <div class="food-info"><h3>杂粮饭 / 糙米饭 <span class="tag">抗饿</span></h3>
+                        <div class="desc">大米:糙米:藜麦 = 2:1:1。如果觉得太硬，煮饭时多放点水，或者提前泡一晚上。<div class="boyfriend-note"><i class="fas fa-hand-holding-heart"></i> <span><b>小骐便签：</b>记得提前泡软哦~</span></div></div></div></div>
+                <div class="food-card">
+                    <div class="img-wrapper"><img src="https://q9.itc.cn/q_70/images03/20250719/ec63110fc91c40fca1e39779e751cb9a.jpeg"></div>
+                    <div class="food-info"><h3>蒸芋艿 <span class="tag">软糯</span></h3>
+                        <div class="desc">就是那种小小的芋艿，蒸熟了蘸一点点酱油吃，超级软糯！热量比米饭低很多。<div class="boyfriend-note"><i class="fas fa-smile"></i> <span><b>小骐便签：</b>这玩意小骐没吃过...</span></div></div></div></div>
+                <div class="food-card">
+                    <div class="img-wrapper"><img src="https://images.unsplash.com/photo-1570586437263-ab629fccc818?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"></div>
+                    <div class="food-info"><h3>蒸贝贝南瓜 <span class="tag">香甜</span></h3>
+                        <div class="desc">热量超低，口感像栗子一样粉糯，当作主食吃满足感极强。<div class="boyfriend-note"><i class="fas fa-crown"></i> <span><b>小骐便签：</b>我靠我搜到的东西怎么都没吃过</span></div></div></div></div>
+                <div class="food-card">
+                    <div class="img-wrapper"><img src="https://images.unsplash.com/photo-1586201375761-83865001e31c?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"></div>
+                    <div class="food-info"><h3>纯藜麦 <span class="tag">超模主食</span></h3>
+                        <div class="desc">富含优质植物蛋白，拌在沙拉里轻盈无负担。<div class="boyfriend-note"><i class="fas fa-magic"></i> <span><b>小骐便签：</b>好吃好吃炒饭好吃</span></div></div></div></div>
+                <div class="food-card">
+                    <div class="img-wrapper"><img src="https://pics7.baidu.com/feed/342ac65c103853436934e6d2a271fb6ecb808838.jpeg@f_auto?token=3cbd0e322c4adbaa475eff9dcdbb9c69"></div>
+                    <div class="food-info"><h3>鹰嘴豆 / 豆类 <span class="tag">慢碳</span></h3>
+                        <div class="desc">优质蛋白和慢碳，饱腹感极强，可以煮熟了当零食吃。</div></div></div>
+            </div>
+        </div>
+
+        <!-- ================= B级一般主食 ================= -->
+        <div id="page-b" class="page">
+            <div class="title-box" style="border-color: var(--yellow-dark);">
+                <button class="back-btn" style="background:var(--yellow-dark);" onclick="goTo('page-home')">← 返回</button>
+                <h1 style="color:var(--yellow-dark);">🍞 B级主食</h1>
+                <p>每周记得别超过3次哦！</p>
+            </div>
+            <div class="food-grid">
+                <div class="food-card"><div class="img-wrapper"><img src="https://pic.rmb.bdstatic.com/bjh/bb83ac6d7f3/250314/c89a74f7122659972afb6f5587dcd3cf.jpeg"></div>
+                    <div class="food-info"><h3>全麦吐司 <span class="tag" style="background:var(--yellow-light); color:var(--yellow-dark)">管饱</span></h3><p class="calorie">每100g 热量：255大卡</p>
+                        <div class="desc">看配料表第一是不是“全麦粉”，别买伪全麦哦。<div class="boyfriend-note"><i class="fas fa-coffee"></i> <span><b>小骐便签：</b>给你煎个无油鸡蛋夹里面做三明治 这个不油腻哦我记住了</span></div></div></div></div>
+                <div class="food-card"><div class="img-wrapper"><img src="https://img1.baidu.com/it/u=1845179256,809785660&fm=253&app=138&f=JPEG?w=800&h=1066"></div>
+                    <div class="food-info"><h3>荞麦面 <span class="tag" style="background:var(--yellow-light); color:var(--yellow-dark)">嗦面</span></h3><p class="calorie">每100g 热量：340大卡</p>
+                        <div class="desc">比白面升糖慢，少放芝麻酱和沙拉酱。<div class="boyfriend-note"><i class="fas fa-utensils"></i> <span><b>小骐便签：</b>想吃凉面发个微信，小骐给你点</span></div></div></div></div>
+                <div class="food-card"><div class="img-wrapper"><img src="https://img0.baidu.com/it/u=3331692427,641134729&fm=253&app=138&f=JPEG?w=800&h=1067"></div>
+                    <div class="food-info"><h3>小米粥 <span class="tag" style="background:var(--yellow-light); color:var(--yellow-dark)">暖胃</span></h3><p class="calorie">每100g 热量：46大卡</p>
+                        <div class="desc">热量低但升糖快，别单独喝，要搭配蔬菜鸡蛋吃。<div class="boyfriend-note"><i class="fas fa-mug-hot"></i> <span><b>小骐便签：</b>胃不舒服喝点热的哦宝宝</span></div></div></div></div>
+                <div class="food-card"><div class="img-wrapper"><img src="https://q7.itc.cn/q_70/images03/20250611/5cf587f649334f03ba873dd575b658e2.jpeg"></div>
+                    <div class="food-info"><h3>大白馒头</h3><p class="calorie">每100g 热量：223大卡</p>
+                        <div class="desc">纯精制碳水，吃1个就够啦，千万别配炼乳吃！<div class="boyfriend-note"><i class="fas fa-ban"></i> <span><b>小骐便签：</b></span></div></div></div></div>
+                <div class="food-card"><div class="img-wrapper"><img src="https://qcloud.dpfile.com/pc/unrNLlZjfOR65eF1e8O35CE0zTVSGxRRNGBlPRmZxY9yZhnHjlA_OcqNGRHw3InY.jpg"></div>
+                    <div class="food-info"><h3>凉面</h3><p class="calorie">每100g 热量：167大卡</p>
+                        <div class="desc">酱料是热量坑！少放麻酱/甜面酱，加多点黄瓜丝，夏天偶尔吃1次没问题~</div></div></div>
+                <div class="food-card"><div class="img-wrapper"><img src="https://q3.itc.cn/images01/20241206/9bd7532f8c624e0b99654b19bc1b8e28.jpeg"></div>
+                    <div class="food-info"><h3>水饺 / 蒸饺</h3><p class="calorie">每100g 热量：250大卡</p>
+                        <div class="desc">肉馅水饺脂肪不低，吃10个左右别配油泼辣子。<div class="boyfriend-note"><i class="fas fa-star"></i> <span><b>小骐便签：</b>气泡音</span></div></div></div></div>
+                <div class="food-card"><div class="img-wrapper"><img src="https://iphoto.mac89.com/photo/180420/180420_230/3Husouz1IH_small.jpg"></div>
+                    <div class="food-info"><h3>意大利面</h3><p class="calorie">每100g 热量：158大卡</p>
+                        <div class="desc">别吃奶油面，选番茄基底的酱加多点蔬菜。<div class="boyfriend-note"><i class="fas fa-heart"></i> <span><b>小骐便签：</b></span></div></div></div></div>
+                <div class="food-card"><div class="img-wrapper"><img src="https://copyright.bdstatic.com/vcg/creative/8dc458d235721c3b2944b205c014d21c.jpg@wm_1,k_cGljX2JqaHdhdGVyLmpwZw=="></div>
+                    <div class="food-info"><h3>土豆泥</h3><p class="calorie">每100g 热量：77大卡</p>
+                        <div class="desc">别加奶油/沙拉酱！用牛奶+少量盐调味道，作为配菜偶尔吃，别当主食~</div></div></div>
+                <div class="food-card"><div class="img-wrapper"><img src="https://miaobi-lite.cdn.bcebos.com/miaobi/5mao/b%27LV8xNzMwNjExOTU5Ljk2NTc2ODM%3D%27/0.png?authorization=bce-auth-v1%2FALTAKmda7zOvhZVbRzBLewvCMU%2F2024-11-03T05%3A32%3A40Z%2F-1%2F%2F618eeeeef16a9b0b5935a49d615ddbb23523f1f92263aa0db5a25afac744e7e7"></div>
+                    <div class="food-info"><h3>全麦贝果</h3><p class="calorie">每100g 热量：约250大卡</p>
+                        <div class="desc">很有嚼劲，适合做早餐。里面可以夹鸡蛋或牛肉哦。<div class="boyfriend-note"><i class="fas fa-bread-slice"></i> <span><b>小骐便签：</b>没吃过.jpg</span></div></div></div></div>
+                <div class="food-card"><div class="img-wrapper"><img src="https://qcloud.dpfile.com/pc/iXE3sjwj20Xn7Jqc6NlNDLcL9YOJrF47k9hprnlHVm1uzSP7hemM7GXL13uADlj9.jpg"></div>
+                    <div class="food-info"><h3>米粉 / 螺蛳粉</h3><p class="calorie">每100g 热量：受汤底影响极大</p>
+                        <div class="desc">碳水和油脂都在汤里，粉本身没问题。想吃的话千万少喝两口汤哦！<div class="boyfriend-note"><i class="fas fa-wind"></i> <span><b>小骐便签：</b>记得千万少喝两口汤哦！</span></div></div></div></div>
+            </div>
+        </div>
+
+        <!-- ================= C级危险主食 ================= -->
+        <div id="page-c" class="page">
+            <div class="title-box" style="border-color: var(--red-dark);">
+                <button class="back-btn" style="background:var(--red-dark);" onclick="goTo('page-home')">← 返回</button>
+                <h1 style="color:var(--red-dark);">🛑 C级主食~</h1>
+                <p>这些都是热量都有点高哦宝宝，想吃重油重盐的话控制在一周一顿放纵餐哦！</p>
+            </div>
+            <div class="food-grid">
+                <div class="food-card"><div class="img-wrapper"><img src="https://qcloud.dpfile.com/pc/aB4Aeb3wReMsU7ZjSruRyZPzVc8C5SgUaWK0MztBRjxhc3h_tO9xdvgPwh8_xqKc.jpg"></div>
+                    <div class="food-info"><h3>油条 <span class="tag" style="background:var(--red-light); color:var(--red-dark)">达咩</span></h3><p class="calorie">每100g 热量：388大卡</p>
+                        <div class="desc">高油高盐，油脂含量超20%，长期吃易引发肥胖，宝宝乖，咱们不吃。<div class="boyfriend-note"><i class="fas fa-shield-alt"></i> <span><b>小骐便签：</b>馋了告诉小骐，我会尽量少投喂你啦</span></div></div></div></div>
+                <div class="food-card"><div class="img-wrapper"><img src="https://img2.baidu.com/it/u=2765127388,1668949978&fm=253&app=138&f=JPEG?w=800&h=1067"></div>
+                    <div class="food-info"><h3>麻球</h3><p class="calorie">每100g 热量：460大卡</p>
+                        <div class="desc">油炸+高糖，碳水和脂肪双高。</div></div></div>
+                <div class="food-card"><div class="img-wrapper"><img src="https://img1.baidu.com/it/u=1078432803,2431679416&fm=253&fmt=auto&app=138&f=JPEG?w=800&h=1067"></div>
+                    <div class="food-info"><h3>奶油蛋糕</h3><p class="calorie">每100g 热量：347大卡</p>
+                        <div class="desc">高糖（碳水超50%）+高脂，升糖快。<div class="boyfriend-note"><i class="fas fa-hand-paper"></i> <span><b>小骐便签：</b>想吃就吃别顾虑</span></div></div></div></div>
+                <div class="food-card"><div class="img-wrapper"><img src="https://img95.699pic.com/xsj/1z/cf/aj.jpg!/fw/700/watermark/url/L3hzai93YXRlcl9kZXRhaWwyLnBuZw/align/southeast"></div>
+                    <div class="food-info"><h3>甜甜圈</h3><p class="calorie">每100g 热量：402大卡</p>
+                        <div class="desc">油炸+糖霜，属于“空热量”食物。</div></div></div>
+                <div class="food-card"><div class="img-wrapper"><img src="https://gips3.baidu.com/it/u=3558976649,591008497&fm=3074&app=3074&f=JPEG"></div>
+                    <div class="food-info"><h3>糖饼</h3><p class="calorie">每100g 热量：350大卡</p>
+                        <div class="desc">高糖+精制面粉，升糖指数高。</div></div></div>
+                <div class="food-card"><div class="img-wrapper"><img src="https://qcloud.dpfile.com/pc/6Eqfze2Dhei0c-N57gfofuXXbkz84fYWUmb_tAJQ3kc-NWtxfLXfDYCIVlAx2HgM.jpg"></div>
+                    <div class="food-info"><h3>煎饼果子</h3><p class="calorie">每100g 热量：250大卡</p>
+                        <div class="desc">加薄脆/油条后热量超350大卡/份，建议去掉油炸配料。</div></div></div>
+                <div class="food-card"><div class="img-wrapper"><img src="https://qcloud.dpfile.com/pc/Hcre6SMVEPsDbLgdF4-4Szx_Y3UsCmSLH5mAM79k_qQ4Dw9j4oF0GFp1WQuTYPWG.jpg"></div>
+                    <div class="food-info"><h3>炒饭 / 炒粉</h3><p class="calorie">每100g 热量：188大卡</p>
+                        <div class="desc">外卖餐馆油盐严重超标，建议在家少油制作。<div class="boyfriend-note"><i class="fas fa-fire"></i> <span><b>小骐便签：</b>想吃炒饭等小骐去找你~ 猛火炒饭</span></div></div></div></div>
+                <div class="food-card"><div class="img-wrapper"><img src="https://pic.rmb.bdstatic.com/bjh/240731/018b8bb78e21bd62bde2fd80fc2c4b117724.jpeg"></div>
+                    <div class="food-info"><h3>葱油饼 / 油饼</h3><p class="calorie">每100g 热量：399大卡</p>
+                        <div class="desc">油脂占比超25%，热量密度极高。PS：我好像没吃过陕西油饼.....</div></div></div>
+                <div class="food-card"><div class="img-wrapper"><img src="https://qcloud.dpfile.com/pc/tZOuBpw7KuipVZ9ZReZ5-03i0MzxI9S7rXI8sZRJxQa56EISlgjLzgwh0hzIGbsL.jpg"></div>
+                    <div class="food-info"><h3>糖油粑粑</h3><p class="calorie">每100g 热量：310大卡</p>
+                        <div class="desc">油炸+红糖裹制。长沙特色：有点想吃</div></div></div>
+                <div class="food-card"><div class="img-wrapper"><img src="https://pic.rmb.bdstatic.com/bjh/241106/dump/9063982a9f91aa2380e157fd374669d6.png"></div>
+                    <div class="food-info"><h3>方便面</h3>
+                        <div class="desc">全是钠，第二天容易水肿。<div class="boyfriend-note"><i class="fas fa-angry"></i> <span><b>小骐便签：</b>少吃哦而且对营养不好</span></div></div></div></div>
+                <div class="food-card"><div class="img-wrapper"><img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"></div>
+                    <div class="food-info"><h3>汉堡 / 炸鸡汉堡</h3><p class="calorie">每100g 热量：超300大卡</p>
+                        <div class="desc">热量核弹。<div class="boyfriend-note"><i class="fas fa-hamburger"></i> <span><b>小骐便签：</b>我爱吃我爱吃！</span></div></div></div></div>
+                <div class="food-card"><div class="img-wrapper"><img src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"></div>
+                    <div class="food-info"><h3>烧烤 / 炸串</h3>
+                        <div class="desc">全是脂肪、重盐。第二天必水肿。<div class="boyfriend-note"><i class="fas fa-skull-crossbones"></i> <span><b>小骐便签：</b>我好久没吃啦~</span></div></div></div></div>
+            </div>
+        </div>
+
+        <!-- ================= 低碳水 ================= -->
+        <div id="page-low" class="page">
+            <div class="title-box" style="border-color: var(--green-dark);">
+                <button class="back-btn" style="background:var(--green-dark);" onclick="goTo('page-home')">← 返回</button>
+                <h1 style="color:var(--green-dark);">🥦 低碳水食物</h1>
+                <p>随便吃！不长肉系列</p>
+            </div>
+            <div class="food-grid">
+                <div class="food-card"><div class="img-wrapper"><img src="https://qcloud.dpfile.com/pc/QqL1axonblgmrekX4Zz-wkVH6dbAMfxB2n4oCVDtNM88Y7qtD6wd7xSIdmKiPJB9.jpg"></div>
+                    <div class="food-info"><h3>春笋 / 笋干</h3>
+                        <div class="desc">图片上是春笋~笋干烧肉~杭州好像蛮多~？。<b>油焖笋</b>虽然好吃但糖油太多，建议吃<b>笋干老鸭煲</b>里的笋。</div></div></div>
+                <div class="food-card"><div class="img-wrapper"><img src="https://qcloud.dpfile.com/pc/pCU7HGvzhMO6vJA-lhcJ31NZ6Z_bl8YVpYwAuW8b34d2s8pOaBaK7noedymStd2h.jpg"></div>
+                    <div class="food-info"><h3>水煮河虾 / 龙井虾仁</h3>
+                        <div class="desc">蛋白质含量极高，脂肪几乎没有。PS：虾类是蛋白质获取且脂肪含量最高的肉类啦 如果喜欢可以多吃</div></div></div>
+                <div class="food-card"><div class="img-wrapper"><img src="https://img2.baidu.com/it/u=2499772158,1092915093&fm=253&app=138&f=JPEG?w=800&h=1777"></div>
+                    <div class="food-info"><h3>西兰花</h3>
+                        <div class="desc">蔬菜之王，水煮后加一点点蚝油蒜泥拌一拌。<div class="boyfriend-note"><i class="fas fa-carrot"></i> <span><b>小骐便签：</b>多吃西兰花皮肤好~</span></div></div></div></div>
+                <div class="food-card"><div class="img-wrapper"><img src="https://q6.itc.cn/images01/20250427/54e0401f32c14cb3b6837bbf5a8dfc52.jpeg"></div>
+                    <div class="food-info"><h3>水煮蛋 / 蒸蛋羹</h3>
+                        <div class="desc">饿了就吃它！但是蛋黄一天最好别超过2个哦。早饭两个蛋。宝是成都来~杭州好像爱吃鸡蛋羹拌饭。<div class="boyfriend-note"><i class="fas fa-heart"></i> <span><b>小骐便签：</b>番茄炒蛋巨好吃，小骐爱吃但是现在西红柿汁水少了呜呜呜</span></div></div></div></div>
+                <div class="food-card"><div class="img-wrapper"><img src="https://img95.699pic.com/xsj/0k/9i/44.jpg!/fw/700/watermark/url/L3hzai93YXRlcl9kZXRhaWwyLnBuZw/align/southeast"></div>
+                    <div class="food-info"><h3>黄瓜</h3>
+                        <div class="desc">嘴巴寂寞时候的替代品，几乎0热量。</div></div></div>
+                <div class="food-card"><div class="img-wrapper"><img src="https://pic.rmb.bdstatic.com/bjh/3ea18db032d4/240825/619b97dad7ca4bfa563453755bc2ca13.jpeg"></div>
+                    <div class="food-info"><h3>白豆腐 / 菌菇</h3>
+                        <div class="desc">吃得饱饱的，热量超低。<div class="boyfriend-note"><i class="fas fa-fire"></i> <span><b>小骐便签：</b>天冷了，点个热汤暖身子！</span></div></div></div></div>
+                <div class="food-card"><div class="img-wrapper"><img src="https://images.unsplash.com/photo-1617093727343-374698b1b08d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"></div>
+                    <div class="food-info"><h3>虾仁滑蛋 / 炒鸡蛋</h3>
+                        <div class="desc">蛋白质+蛋白质，饱腹感强又营养！<div class="boyfriend-note"><i class="fas fa-heart"></i> <span><b>小骐便签：</b>这道菜小骐快练满级了~我不知道吃啥就给自己做这个</span></div></div></div></div>
+                <div class="food-card"><div class="img-wrapper"><img src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"></div>
+                    <div class="food-info"><h3>蒜蓉油麦菜 / 空心菜</h3>
+                        <div class="desc">膳食纤维拉满。<div class="boyfriend-note"><i class="fas fa-leaf"></i> <span><b>小骐便签：</b>小骑最讨厌的绿色....</span></div></div></div></div>
+                <div class="food-card"><div class="img-wrapper"><img src="https://gips3.baidu.com/it/u=703701060,2873623235&fm=3074&app=3074&f=JPEG"></div>
+                    <div class="food-info"><h3>凉拌木耳 / 凉拌菜</h3>
+                        <div class="desc">清肠胃。<div class="boyfriend-note"><i class="fas fa-kiss"></i> <span><b>小骐便签：</b>要是自己调凉拌汁别放太多红油，加点醋酸酸的就好啦~</span></div></div></div></div>
+                <div class="food-card"><div class="img-wrapper"><img src="https://images.unsplash.com/photo-1546069901-d5bfd2cbfb1f?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"></div>
+                    <div class="food-info"><h3>清蒸鱼 / 海鲜</h3>
+                        <div class="desc">海鲜类神仙减脂肉，多吃也不胖。</div></div></div>
+            </div>
+        </div>
+
+        <!-- ================= 中碳水 ================= -->
+        <div id="page-mid" class="page">
+            <div class="title-box">
+                <button class="back-btn" onclick="goTo('page-home')">← 返回</button>
+                <h1 style="color:#48bb78;">🌾 中碳水食物</h1>
+                <p>日常所需的健康能量来源，乖乖吃~</p>
+            </div>
+            <div class="food-grid">
+                <div class="food-card"><div class="img-wrapper"><img src="https://img0.baidu.com/it/u=1326537380,110252415&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=653"></div>
+                    <div class="food-info"><h3>糙米</h3><p class="calorie">每100g | 热量348大卡</p>
+                        <div class="desc">全谷物主食，饱腹感强。不爱吃呜呜呜呜不知道宝宝怎么样</div></div></div>
+                <div class="food-card"><div class="img-wrapper"><img src="https://gips3.baidu.com/it/u=2198390742,35997622&fm=3074&app=3074&f=JPEG?w=1440&h=1890&type=normal&func="></div>
+                    <div class="food-info"><h3>鸡胸肉</h3><p class="calorie">每100g | 热量165大卡</p>
+                        <div class="desc">低脂高蛋白。之前我经常做土豆炖鸡胸肉，就是有点柴。<div class="boyfriend-note"><i class="fas fa-kiss"></i> <span><b>小骐便签：</b>自己在外多吃点牛肉补气血 尤其是生理期哦！</span></div></div></div></div>
+                <div class="food-card"><div class="img-wrapper"><img src="https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fcbu01.alicdn.com%2Fimg%2Fibank%2FO1CN01Igps1s1qnMzm9jdBF_%21%212214754935540-0-cib.jpg&refer=http%3A%2F%2Fcbu01.alicdn.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=auto?sec=1768748561&t=84f13b3b505b3a0b4f6739846b0c00a2"></div>
+                    <div class="food-info"><h3>红薯</h3><p class="calorie">每100g | 热量86大卡</p>
+                        <div class="desc">富含膳食纤维，替代部分主食。</div></div></div>
+                <div class="food-card"><div class="img-wrapper"><img src="https://pic.rmb.bdstatic.com/bjh/02080a142bd64376e33b05e4fc6ca2868858.jpeg@h_1280"></div>
+                    <div class="food-info"><h3>燕麦</h3><p class="calorie">每100g | 热量389大卡</p>
+                        <div class="desc">搭配牛奶更营养。PS：燕麦加甜牛奶吃起来还算不错。<div class="boyfriend-note"><i class="fas fa-mug-hot"></i> <span><b>小骐便签：</b>早上必须乖乖冲一杯燕麦~！</span></div></div></div></div>
+                <div class="food-card"><div class="img-wrapper"><img src="https://img2.baidu.com/it/u=2582307617,2480951026&fm=253&fmt=auto&app=138&f=JPEG?w=800&h=1067"></div>
+                    <div class="food-info"><h3>青椒炒瘦肉 / 小炒肉</h3><p class="calorie">每100g | 热量150大卡</p>
+                        <div class="desc">日常炒菜的经典，瘦肉补充能量。</div></div></div>
+                <div class="food-card"><div class="img-wrapper"><img src="https://pics6.baidu.com/feed/1c950a7b02087bf4e4eb4c5c377b153c10dfcfbd.jpeg@f_auto?token=35b53cb2da0badd5c3e8392b956ee256"></div>
+                    <div class="food-info"><h3>西红柿炖牛腩</h3><p class="calorie">每100g | 热量110大卡</p>
+                        <div class="desc">牛腩补气血，番茄开胃。<div class="boyfriend-note"><i class="fas fa-fire"></i> <span><b>小骐便签：</b>很补气血</span></div></div></div></div>
+                <div class="food-card"><div class="img-wrapper"><img src="https://qcloud.dpfile.com/pc/_YeVT_qXXp2PuGcBP2SdMzoyoVWoGLlvaMYSPRL0mCqMLdZ21fUbS-AzRa0W0wPg.jpg"></div>
+                    <div class="food-info"><h3>干锅花菜 / 炒时蔬</h3><p class="calorie">每100g | 热量120大卡</p>
+                        <div class="desc">干锅做法油比较多哦。<div class="boyfriend-note"><i class="fas fa-exclamation-triangle"></i> <span><b>小骐便签：</b></span></div></div></div></div>
+            </div>
+        </div>
+
+        <!-- ================= 高碳水 ================= -->
+        <div id="page-high" class="page">
+            <div class="title-box" style="border-color: var(--red-dark);">
+                <button class="back-btn" style="background:var(--red-dark);" onclick="goTo('page-home')">← 返回</button>
+                <h1 style="color:var(--red-dark);">🍟 高碳水食物</h1>
+                <p>容易导致血糖波动，管住嘴哦宝宝！</p>
+            </div>
+            <div class="food-grid">
+                <div class="food-card"><div class="img-wrapper"><img src="https://qcloud.dpfile.com/pc/Bftu7QApsAEqi8RNpOu7pIfS7G0LGQCPY8ZKpk57a4GAKli5ks6yE4oaDIU0_AUp.jpg"></div>
+                    <div class="food-info"><h3>炸鸡</h3><p class="calorie">每100g | 热量277大卡</p>
+                        <div class="desc">高脂肪+精制裹粉，建议每月食用≤2次。</div></div></div>
+                <div class="food-card"><div class="img-wrapper"><img src="https://pic.rmb.bdstatic.com/bjh/250925/dump/92f262520dae10c5002ceaf58fea5b56.png"></div>
+                    <div class="food-info"><h3>奶油蛋糕</h3><p class="calorie">每100g | 热量347大卡</p>
+                        <div class="desc">高糖高脂。</div></div></div>
+                <div class="food-card"><div class="img-wrapper"><img src="https://pic.rmb.bdstatic.com/bjh/250703/dump/ad8cd50397091ffe30a3d77e36ed727f.jpeg"></div>
+                    <div class="food-info"><h3>薯片</h3><p class="calorie">每100g | 热量536大卡</p>
+                        <div class="desc">高油高盐+精制淀粉。</div></div></div>
+                <div class="food-card"><div class="img-wrapper"><img src="https://pic.rmb.bdstatic.com/bjh/bc1138afd22d/250831/680668cd51e82fa590fc424b5c395e91.jpeg"></div>
+                    <div class="food-info"><h3>奶茶 / 冰淇淋</h3>
+                        <div class="desc">糖分和反式脂肪爆表。<div class="boyfriend-note"><i class="fas fa-coffee"></i> <span><b>小骐便签：</b>馋奶茶了告诉小骐~这个喝了心情好哦</span></div></div></div></div>
+                <div class="food-card"><div class="img-wrapper"><img src="https://q8.itc.cn/images01/20240510/ca129d0d335749d69248f8e1e5459cd1.jpeg"></div>
+                    <div class="food-info"><h3>红烧肉 / 糖醋排骨</h3><p class="calorie">每100g | 近500大卡</p>
+                        <div class="desc">糖油完美融合。非常美味但极易长肉。<div class="boyfriend-note"><i class="fas fa-times"></i> <span><b>小骐便签：</b>好吃 无需多言 想吃还是吃~</span></div></div></div></div>
+                <div class="food-card"><div class="img-wrapper"><img src="https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"></div>
+                    <div class="food-info"><h3>地三鲜 / 干煸四季豆</h3>
+                        <div class="desc">炸过的蔬菜吸满油。</div></div></div>
+                <div class="food-card"><div class="img-wrapper"><img src="https://images.unsplash.com/photo-1565557623262-b51c2513a641?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"></div>
+                    <div class="food-info"><h3>毛血旺 / 水煮鱼</h3>
+                        <div class="desc">表面飘着红油。<div class="boyfriend-note"><i class="fas fa-pepper-hot"></i> <span><b>小骐便签：</b>这个是真的好吃欸~</span></div></div></div></div>
+            </div>
+        </div>
+
+        <!-- ================= 水果区 ================= -->
+        <div id="page-fruit" class="page">
+            <div class="title-box" style="border-color: #ed8936;">
+                <button class="back-btn" style="background:#ed8936;" onclick="goTo('page-home')">← 返回</button>
+                <h1 style="color:#ed8936;">🍎 水果区</h1>
+                <p>每日总摄入量控制在200-350g哦！</p>
+            </div>
+            <div class="food-grid">
+                <div class="food-card"><div class="img-wrapper"><img src="https://pic.rmb.bdstatic.com/bjh/240703/dump/b7b7c2d73d3fda9318d454f60c75b456.jpeg"></div>
+                    <div class="food-info"><h3>蓝莓</h3><p class="calorie">每100g | 57大卡</p>
+                        <div class="desc">富含花青素。</div></div></div>
+                <div class="food-card"><div class="img-wrapper"><img src="https://pic.rmb.bdstatic.com/bjh/250303/dump/6a1af15f98934075f339ac65c7d77f2d.png"></div>
+                    <div class="food-info"><h3>苹果</h3><p class="calorie">每100g | 52大卡</p>
+                        <div class="desc">但宝讲过不爱吃 略过略过</div></div></div>
+                <div class="food-card"><div class="img-wrapper"><img src="https://img2.baidu.com/it/u=1473083855,1389165317&fm=253&fmt=auto&app=138&f=JPEG?w=503&h=500"></div>
+                    <div class="food-info"><h3>芒果</h3><p class="calorie">每100g | 60大卡</p>
+                        <div class="desc">高糖水果，每日食用≤100g。</div></div></div>
+                <div class="food-card"><div class="img-wrapper"><img src="https://p3.ssl.qhimgs1.com/t04efa986137b800b73.jpg"></div>
+                    <div class="food-info"><h3>猕猴桃</h3><p class="calorie">每100g | 61大卡</p>
+                        <div class="desc">富含维生素C，每日1-2个。</div></div></div>
+                <div class="food-card"><div class="img-wrapper"><img src="https://p0.ssl.qhimgs1.com/t0427f0f23b7d5c8afa.jpg"></div>
+                    <div class="food-info"><h3>柚子~</h3><p class="calorie">每100g | 42大卡</p>
+                        <div class="desc">适合餐前食用。</div></div></div>
+                <div class="food-card"><div class="img-wrapper"><img src="http://pic.huitu.com/pic/20191210/1149609_20191210074527064020_0.jpg"></div>
+                    <div class="food-info"><h3>香蕉</h3><p class="calorie">一根 | 105大卡</p>
+                        <div class="desc">运动前后吃，避免睡前。</div></div></div>
+                <div class="food-card"><div class="img-wrapper"><img src="https://p9-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/search_multi_media/8133d20176b8413d94f04ca64e926322~tplv-a9rns2rl98-pc_smart_face_crop-v1:512:384.image?rcl=20251219234100938BD12F32555394CF22&rk3s=8e244e95&rrcfp=cee388b0&x-expires=2081518864&x-signature=yzK3vJsEJeQM5p3Z9J3FAh7cSYY%3D"></div>
+                    <div class="food-info"><h3>小番茄</h3><p class="calorie">每100g | 25大卡</p>
+                        <div class="desc">减重优选水果。</div></div></div>
+                <div class="food-card"><div class="img-wrapper"><img src="https://images.unsplash.com/photo-1596363505729-4190a9506133?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"></div>
+                    <div class="food-info"><h3>葡萄 / 提子</h3><p class="calorie">每100g | 45大卡</p>
+                        <div class="desc">糖分高。</div></div></div>
+                <div class="food-card"><div class="img-wrapper"><img src="https://pics5.baidu.com/feed/d6ca7bcb0a46f21fe04ba7f96ca2eb6e0d33aeb6.jpeg@f_auto?token=7002e5778c1d704d4abea8d8fd493c56"></div>
+                    <div class="food-info"><h3>水蜜桃</h3><p class="calorie">每100g | 42大卡</p>
+                        <div class="desc">宝宝不爱吃这个。</div></div></div>
+            </div>
+        </div>
+
+        <!-- ================= 运动损伤指南 ================= -->
+        <div id="page-injury" class="page">
+            <div class="title-box" style="border-color: #4299e1;">
+                <button class="back-btn" style="background:#4299e1;" onclick="goTo('page-home')">← 返回</button>
+                <h1 style="color:#4299e1;">🩹 运动损伤及恢复指南</h1>
+                <p>身体的信号要听懂，劳逸结合最美了！</p>
+            </div>
+            <div class="food-grid">
+                <div class="food-card injury-card"><div class="img-wrapper"><img src="https://nimg.ws.126.net/?url=http%3A%2F%2Fdingyue.ws.126.net%2F2024%2F0326%2Fb4503b7bj00saxmci0022d000u000rvm.jpg"></div>
+                    <div class="food-info"><h3>腹部疼痛 (侧腹痛)</h3>
+                        <div class="problem"><strong>可能原因：</strong>呼吸不均匀导致的膈肌痉挛。酸痛两天说明宝宝太累了。</div>
+                        <div class="solution">立即减慢速度，深呼吸。<div class="boyfriend-note" style="background:#e6f2ff; border-color:#4299e1; color:#2b6cb0;"><i class="fas fa-hands"></i> <span>宝宝自己顺顺气揉揉肚子~我在就帮你来~</span></div></div></div></div>
+                <div class="food-card injury-card"><div class="img-wrapper"><img src="https://b0.bdstatic.com/009726fea6c018e7cc7a1bf5a0c301dc.jpg"></div>
+                    <div class="food-info"><h3>肌肉酸痛 (DOMS)</h3>
+                        <div class="problem"><strong>原因：</strong>延迟性肌肉酸痛，通常在24-48小时达到高峰。</div>
+                        <div class="solution">多补充蛋白，洗热水澡。<div class="boyfriend-note" style="background:#e6f2ff; border-color:#4299e1; color:#2b6cb0;"><i class="fas fa-bath"></i> <span>快去泡个热水澡放松下</span></div></div></div></div>
+                <div class="food-card injury-card"><div class="img-wrapper"><img src="https://img.pconline.com.cn/images/upload/upc/tx/it666/2103/02/c20/256860368_1614668262747.jpg"></div>
+                    <div class="food-info"><h3>肩膀“咔咔”弹响</h3>
+                        <div class="problem"><strong>原因：</strong>肩袖力量不足。</div>
+                        <div class="solution">练前一定要充分活动肩关节。</div></div></div>
+                <div class="food-card injury-card"><div class="img-wrapper"><img src="https://pic.rmb.bdstatic.com/bjh/260119/dump/fd64b9d7094278720050da51ec896915.jpeg"></div>
+                    <div class="food-info"><h3>膝盖前方隐痛</h3>
+                        <div class="problem"><strong>原因：</strong>深蹲姿势不当。</div>
+                        <div class="solution">冰敷，加强臀部力量。<div class="boyfriend-note" style="background:#e6f2ff; border-color:#4299e1; color:#2b6cb0;"><i class="fas fa-user-nurse"></i> <span>疼就休息下吧宝宝 辛苦啦</span></div></div></div></div>
+                <div class="food-card injury-card"><div class="img-wrapper"><img src="https://img2.baidu.com/it/u=4067161053,3459870033&fm=253&fmt=auto&app=138&f=JPEG?w=750&h=500"></div>
+                    <div class="food-info"><h3>崴脚</h3>
+                        <div class="problem">RICE原则：静养、冰敷、加压、抬高。</div></div></div>
+                <div class="food-card injury-card"><div class="img-wrapper"><img src="https://img1.baidu.com/it/u=185287312,3222946043&fm=253&app=138&f=JPEG?w=800&h=1727"></div>
+                    <div class="food-info"><h3>腰部酸痛 (闪腰)</h3>
+                        <div class="problem">核心没收紧。用热水袋热敷。</div></div></div>
+                <div class="food-card injury-card"><div class="img-wrapper"><img src="https://images.unsplash.com/photo-1600881333168-2ef49b341f30?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"></div>
+                    <div class="food-info"><h3>脖颈僵硬</h3>
+                        <div class="problem">看手机太久。定时转脖子，热敷。</div></div></div>
+                <div class="food-card injury-card"><div class="img-wrapper"><img src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"></div>
+                    <div class="food-info"><h3>手腕痛</h3>
+                        <div class="problem">支撑角度不对。改用哑铃支撑。</div></div></div>
+            </div>
+            <div style="margin-top: 40px; text-align: center; color: #718096; font-size: 14px;">我会一直陪着你的。</div>
+        </div>
+    </div>
+
+    <!-- 交互逻辑 -->
+    <script>
+        const hour = new Date().getHours();
+        let greeting = "早安呀宝宝 ☀️";
+        if(hour >= 9 && hour < 14) greeting = "该吃午饭啦宝宝 🍚";
+        else if(hour >= 14 && hour < 18) greeting = "下午好呀我的宝 ☕";
+        else if(hour >= 18 && hour < 22) greeting = "晚上好呀宝宝 ✨";
+        else if(hour >= 22 || hour < 5) greeting = "夜深啦早点休息 🌙";
+        document.getElementById('dynamic-greeting').innerText = `🍱 ${greeting}`;
+
+        // 页面跳转
+        function goTo(id) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            setTimeout(() => document.getElementById(id).classList.add('active'), 50);
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg; t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 2500);
+        }
+
+        // 粒子特效
+        function createHeartBurst(x, y, char, count=8) {
+            for(let i=0; i<count; i++) {
+                const p = document.createElement('div');
+                p.className = 'trail-particle'; p.innerHTML = char;
+                p.style.left = x + 'px'; p.style.top = y + 'px';
+                p.style.fontSize = (Math.random()*15 + 20) + 'px';
+                const ang = Math.random() * Math.PI * 2;
+                const dist = Math.random() * 100 + 50;
+                document.body.appendChild(p);
+                requestAnimationFrame(() => {
+                    p.style.transform = `translate(${Math.cos(ang)*dist}px, ${Math.sin(ang)*dist}px) scale(0)`;
+                    p.style.opacity = '0';
+                });
+                setTimeout(() => p.remove(), 1000);
+            }
+        }
+
+        function triggerHeartRain() {
+            for(let i=0; i<30; i++) {
+                setTimeout(() => {
+                    const h = document.createElement('div');
+                    h.className = 'heart-bg'; h.innerHTML = '❤️';
+                    h.style.left = Math.random() * 100 + 'vw'; h.style.top = '-50px';
+                    h.style.transition = "all 3s linear";
+                    document.body.appendChild(h);
+                    requestAnimationFrame(() => h.style.transform = `translateY(110vh) rotate(${Math.random()*360}deg)`);
+                    setTimeout(() => h.remove(), 3000);
+                }, i * 100);
+            }
+        }
+
+        // 小狗逻辑
+        let dogCombo = 0;
+        let comboReset = null;
+        const dog = document.querySelector('.cute-dog');
+        const bubble = document.getElementById('dogBubble');
+
+        function dogClick(e) {
+            dogCombo++;
+            clearTimeout(comboReset);
+            dog.classList.add('eyes-closed', 'ear-wiggle', 'is-shy');
+            createHeartBurst(e.clientX, e.clientY, '💖');
+
+            if (dogCombo >= 20) {
+                bubble.innerText = "😵‍💫 晕掉啦！宝宝快住手";
+                dog.classList.add('dog-dizzy');
+                document.getElementById('modalOverlay').style.display = 'block';
+                document.getElementById('comboModal').classList.add('active');
+            } else if (dogCombo >= 10) {
+                bubble.innerText = "❤️ 超级爆炸想你！";
+                dog.classList.add('dog-excited');
+                triggerHeartRain();
+            } else {
+                const phrases = ["哎呀！被抓到啦~", "再摸一下试试？", "好舒服，贴贴宝宝~ ❤️", "宝宝加油！你是最棒的 💪", "想你想你想你！✨", "小骐一直在呢 🫂"];
+                bubble.innerText = phrases[Math.floor(Math.random() * phrases.length)];
+            }
+            bubble.classList.add('show');
+            comboReset = setTimeout(() => {
+                dogCombo = 0;
+                dog.classList.remove('eyes-closed', 'ear-wiggle', 'dog-excited', 'dog-dizzy', 'is-shy');
+                bubble.classList.remove('show');
+            }, 3000);
+        }
+
+        function autoDogAction() {
+            const actions = [
+                () => { dog.classList.add('eyes-closed'); setTimeout(() => dog.classList.remove('eyes-closed'), 500); },
+                () => { dog.classList.add('ear-wiggle'); setTimeout(() => dog.classList.remove('ear-wiggle'), 1500); },
+                () => {
+                    const thoughts = ["喝水水了吗？🥤", "要乖乖吃饭哦", "想抱抱你了...🫂", "爱你哟~"];
+                    if(dogCombo === 0) { bubble.innerText = thoughts[Math.floor(Math.random()*thoughts.length)]; bubble.classList.add('show'); setTimeout(() => bubble.classList.remove('show'), 3000); }
+                }
+            ];
+            if (dogCombo === 0) actions[Math.floor(Math.random() * actions.length)]();
+            setTimeout(autoDogAction, Math.random() * 8000 + 4000);
+        }
+        autoDogAction();
+
+        function closeModal() {
+            document.getElementById('modalOverlay').style.display = 'none';
+            document.getElementById('comboModal').classList.remove('active');
+        }
+
+        // 视线追踪
+        document.addEventListener('mousemove', e => {
+            if (dog.classList.contains('eyes-closed')) return;
+            document.querySelectorAll('.dog-eye').forEach(eye => {
+                const rect = eye.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+                const angle = Math.atan2(e.clientY - centerY, e.clientX - centerX);
+                const dist = Math.min(4, Math.hypot(e.clientX-centerX, e.clientY-centerY)/40);
+                eye.querySelector('.dog-pupil').style.transform = `translate(${Math.cos(angle)*dist}px, ${Math.sin(angle)*dist}px)`;
+            });
+        });
+
+        // 5. 初始化业务逻辑
+        const meals = {
+            br: ["玉米+热牛奶+蛋🍳", "紫薯+豆浆", "全麦吐司+蛋"],
+            lu: ["杂粮饭+鸡胸炒菜🥦", "荞麦面+牛肉", "番茄炒蛋+米饭"],
+            di: ["蒸南瓜+清蒸鱼🐟", "山药粥+白水蛋", "红薯+凉拌黄瓜"],
+            sn: ["蓝莓一盒🫐", "酸奶一杯🥛", "坚果一包🥜"]
+        };
+        function generateMeal(e) {
+            createHeartBurst(e.clientX, e.clientY, '🎲');
+            document.getElementById('meal-break').innerText = meals.br[Math.floor(Math.random()*3)];
+            document.getElementById('meal-lunch').innerText = meals.lu[Math.floor(Math.random()*3)];
+            document.getElementById('meal-dinner').innerText = meals.di[Math.floor(Math.random()*3)];
+            document.getElementById('meal-snack').innerText = meals.sn[Math.floor(Math.random()*4)];
+            document.getElementById('mealResult').style.display = 'block';
+        }
+
+        // 自动注入食物点赞
+        document.querySelectorAll('.food-card').forEach(card => {
+            const img = card.querySelector('img');
+            if(img && !card.classList.contains('injury-card')) {
+                const wrapper = document.createElement('div'); wrapper.className = 'img-wrapper';
+                img.parentNode.insertBefore(wrapper, img); wrapper.appendChild(img);
+                const love = document.createElement('div');
+                love.className = 'love-btn'; love.innerHTML = '🤍';
+                love.onclick = (e) => {
+                    e.stopPropagation();
+                    love.innerHTML = love.innerHTML==='🤍'?'❤️':'🤍';
+                    if(love.innerHTML==='❤️') { showToast("已存入投喂清单！📝"); createHeartBurst(e.clientX, e.clientY, '❤️'); }
+                };
+                wrapper.appendChild(love);
+            }
+        });
+
+        // 背景漂浮心
+        setInterval(() => {
+            const h = document.createElement('div'); h.className = 'heart-bg'; h.innerHTML = '💖';
+            h.style.left = Math.random() * 100 + 'vw';
+            document.getElementById('heart-container').appendChild(h);
+            setTimeout(() => h.remove(), 12000);
+        }, 1500);
+
+        // 鼠标拖尾
+        let lastTrail = 0;
+        document.addEventListener('mousemove', e => {
+            if(Date.now() - lastTrail < 60) return;
+            const p = document.createElement('div'); p.className = 'trail-particle'; p.innerHTML = '✨';
+            p.style.left = e.clientX + 'px'; p.style.top = e.clientY + 'px';
+            document.body.appendChild(p);
+            setTimeout(() => p.remove(), 800);
+            lastTrail = Date.now();
+        });
+    </script>
+</body>
+</html>
