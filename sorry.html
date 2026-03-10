@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Happiness Override</title>
+    <style>
+        :root {
+            --primary-pink: #ffe0e6;
+            --cat-white: #ffffff;
+            --text-dark: #4a4a4a;
+            --matrix-green: #00ff41;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: var(--primary-pink);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* --- 治愈系云朵猫 --- */
+        .cat-container {
+            width: 200px;
+            height: 200px;
+            position: relative;
+            margin: 0 auto 20px;
+        }
+
+        .cat {
+            width: 100%;
+            height: 100%;
+            background: var(--cat-white);
+            border-radius: 50% 50% 45% 45%;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(255, 182, 193, 0.6);
+            transition: all 0.5s ease;
+            animation: breathe 3s infinite;
+        }
+
+        @keyframes breathe {
+            0%, 100% { transform: scale(1) translateY(0); }
+            50% { transform: scale(1.05) translateY(-5px); }
+        }
+
+        /* 猫耳朵 */
+        .cat::before, .cat::after {
+            content: '';
+            position: absolute;
+            top: -10px;
+            width: 50px;
+            height: 60px;
+            background: var(--cat-white);
+            border-radius: 20px;
+            z-index: -1;
+        }
+        .cat::before { left: 20px; transform: rotate(-20deg); }
+        .cat::after { right: 20px; transform: rotate(20deg); }
+
+        /* 脸部 */
+        .face {
+            position: absolute;
+            width: 100%;
+            top: 75px;
+            text-align: center;
+        }
+
+        .eyes {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+        }
+
+        .eye {
+            width: 14px;
+            height: 14px;
+            background: var(--text-dark);
+            border-radius: 50%;
+            position: relative;
+            transition: 0.3s;
+        }
+
+        .mouth {
+            width: 24px;
+            height: 12px;
+            border-bottom: 3px solid var(--text-dark);
+            border-radius: 0 0 12px 12px;
+            margin: 15px auto 0;
+            transition: 0.3s;
+        }
+
+        /* 腮红 */
+        .blushes {
+            position: absolute;
+            width: 100%;
+            top: 100px;
+            display: flex;
+            justify-content: space-around;
+            padding: 0 20px;
+            opacity: 0.4;
+        }
+
+        .blush { width: 25px; height: 10px; background: #ffb6c1; border-radius: 50%; filter: blur(2px); }
+
+        /* --- UI 界面 --- */
+        #ui-box {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            padding: 40px 60px;
+            border-radius: 40px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.05);
+            border: 2px solid #fff;
+            max-width: 500px;
+            width: 90%;
+            z-index: 10;
+        }
+
+        h1 { font-size: 24px; color: var(--text-dark); margin-bottom: 30px; }
+
+        .btn-group {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            position: relative;
+            height: 60px;
+        }
+
+        .btn {
+            padding: 12px 35px;
+            border: none;
+            border-radius: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        #yes-btn { background: #4a4a4a; color: #fff; }
+        #no-btn { background: #fff; color: #4a4a4a; border: 2px solid #eee; z-index: 100; }
+
+        /* --- 黑客全屏层 --- */
+        #hacker-layer {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #000;
+            display: none;
+            z-index: 1000;
+        }
+        canvas { display: block; }
+        .terminal {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            color: var(--matrix-green);
+            font-family: 'Courier New', monospace;
+            text-align: left;
+            pointer-events: none;
+        }
+
+        /* 强制按钮 */
+        #force-btn-wrap {
+            position: absolute;
+            bottom: 15%;
+            width: 100%;
+            display: none;
+            justify-content: center;
+        }
+
+        /* 状态类 */
+        .sad-mouth { border-radius: 12px 12px 0 0 !important; border-bottom: none !important; border-top: 3px solid #4a4a4a !important; height: 10px !important; }
+        .frozen { filter: grayscale(1) !important; animation: none !important; }
+    </style>
+</head>
+<body>
+
+<div id="ui-box">
+    <div class="cat-container">
+        <div class="cat" id="cat">
+            <div class="blushes">
+                <div class="blush"></div>
+                <div class="blush"></div>
+            </div>
+            <div class="face">
+                <div class="eyes">
+                    <div class="eye"></div>
+                    <div class="eye"></div>
+                </div>
+                <div class="mouth" id="mouth"></div>
+            </div>
+        </div>
+    </div>
+    <h1 id="title">宝宝，你今天开不开心呀？</h1>
+    <div class="btn-group" id="btn-group">
+        <button class="btn" id="yes-btn">开心！</button>
+        <button class="btn" id="no-btn">不开心</button>
+    </div>
+</div>
+
+<div id="hacker-layer">
+    <canvas id="canvas"></canvas>
+    <div class="terminal" id="terminal"></div>
+    <div id="force-btn-wrap">
+        <button class="btn" id="forced-yes" style="background: var(--matrix-green); color: #000; transform: scale(1.5);">
+            RUN_EMOTION_PATCH_V2.EXE
+        </button>
+    </div>
+</div>
+
+<script>
+    let rejectCount = 0;
+    const noBtn = document.getElementById('no-btn');
+    const yesBtn = document.getElementById('yes-btn');
+    const forcedYesBtn = document.getElementById('forced-yes');
+    const mouth = document.getElementById('mouth');
+    const cat = document.getElementById('cat');
+    const title = document.getElementById('title');
+
+    // --- 按钮点击逻辑 ---
+
+    // 开心按钮
+    yesBtn.onclick = () => celebrate();
+    forcedYesBtn.onclick = () => {
+        document.getElementById('hacker-layer').style.display = 'none';
+        celebrate();
+    };
+
+    // 不开心按钮
+    noBtn.onclick = () => {
+        rejectCount++;
+        handleReject();
+    };
+
+    // 瞬移逻辑
+    noBtn.onmouseover = () => {
+        if (rejectCount >= 2) {
+            const x = Math.random() * (window.innerWidth - 150);
+            const y = Math.random() * (window.innerHeight - 80);
+            noBtn.style.position = 'fixed';
+            noBtn.style.left = x + 'px';
+            noBtn.style.top = y + 'px';
+        }
+    };
+
+    function handleReject() {
+        if (rejectCount === 1) {
+            mouth.classList.add('sad-mouth');
+            title.innerText = "诶？真的不开心吗？QAQ";
+        } else if (rejectCount === 2) {
+            title.innerText = "宝宝再考虑一下嘛...";
+            noBtn.innerText = "点不着我~";
+        } else if (rejectCount === 3) {
+            cat.classList.add('frozen');
+            title.innerText = "系统尝试理解此情绪中...";
+        } else if (rejectCount >= 4) {
+            startMatrix();
+        }
+    }
+
+    function celebrate() {
+        document.body.style.backgroundColor = "#fff";
+        cat.classList.remove('frozen');
+        mouth.classList.remove('sad-mouth');
+        mouth.style.height = "20px";
+        title.innerText = "最爱宝宝啦！我们要一直开心！❤️";
+        document.getElementById('btn-group').innerHTML = "<h2 style='color:#ff6b81'>Happiness Confirmed!</h2>";
+        
+        // 撒爱心特效
+        setInterval(() => {
+            const h = document.createElement('div');
+            h.innerHTML = "❤️";
+            h.style.position = 'fixed';
+            h.style.left = Math.random() * 100 + 'vw';
+            h.style.bottom = '-20px';
+            h.style.fontSize = Math.random() * 30 + 20 + 'px';
+            h.style.zIndex = '9999';
+            document.body.appendChild(h);
+            const ani = h.animate([
+                { transform: 'translateY(0) rotate(0)', opacity: 1 },
+                { transform: `translateY(-110vh) rotate(${Math.random()*360}deg)`, opacity: 0 }
+            ], 3000);
+            ani.onfinish = () => h.remove();
+        }, 100);
+    }
+
+    // --- 矩阵改码逻辑 ---
+
+    function startMatrix() {
+        document.getElementById('ui-box').style.display = 'none';
+        document.getElementById('hacker-layer').style.display = 'block';
+        
+        // Canvas 动画
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$@#&%";
+        const fontSize = 16;
+        const columns = canvas.width / fontSize;
+        const drops = Array(Math.floor(columns)).fill(1);
+
+        function draw() {
+            ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "#0F0";
+            ctx.font = fontSize + "px monospace";
+            for (let i = 0; i < drops.length; i++) {
+                const text = letters[Math.floor(Math.random() * letters.length)];
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+                drops[i]++;
+            }
+        }
+        setInterval(draw, 33);
+
+        // 终端日志
+        const terminal = document.getElementById('terminal');
+        const logs = [
+            "> [SYSTEM] REJECTION_SIGNAL_DETECTED",
+            "> [WARN] UNABLE TO PROCESS 'UNHAPPY' STATUS",
+            "> [INFO] ATTEMPTING KERNEL OVERRIDE...",
+            "> [INFO] REPLACING emotion.dll WITH joy_source.lib",
+            "> Executing: sed -i 's/unhappy/super_happy/g' user_soul.conf",
+            "> [SUCCESS] DATABASE ENTRIES MODIFIED.",
+            "> [CRITICAL] REDIRECTING USER CHOICE TO 'HAPPY'...",
+            "> Patching successful. Restarting emotion_engine..."
+        ];
+
+        let i = 0;
+        function showLogs() {
+            if (i < logs.length) {
+                const div = document.createElement('div');
+                div.innerText = logs[i];
+                terminal.appendChild(div);
+                i++;
+                setTimeout(showLogs, 700);
+            } else {
+                document.getElementById('force-btn-wrap').style.display = 'flex';
+            }
+        }
+        showLogs();
+    }
+</script>
+
+</body>
+</html>
